@@ -9,6 +9,7 @@
       "type": "module"
     },
     "permissions": [
-      "identity"
+      "identity",
+      "storage"
     ]
   }
