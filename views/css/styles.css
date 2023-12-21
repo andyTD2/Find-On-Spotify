@@ -1,0 +1,55 @@
+:root {
+    --bg-color: rgb(57, 84, 100);
+}
+
+html {
+    width: 300px;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    padding-top: 5px;
+}
+
+.smallText {
+    font-size: 1rem;
+}
+
+.midText
+{
+    font-size: 1.25rem;
+}
+
+
+.largeButton {
+    width: 200px;
+    height: 50px;
+    font-size: 1.5rem;
+    align-self: center;
+    background-color: var(--bg-color);
+    color: white;
+}
+
+.largeButton:hover {
+    background-color: rgb(80, 118, 140);
+}
+
+.largeButton:active {
+    background-color: white;
+    color: var(--bg-color);
+}
+
+#unlink-account, #link-account {
+    margin-top: 20px;
+}
+
+#appName {
+    padding-bottom: 5px;
+    font-weight: bold;
+    color: var(--bg-color);
+}
+

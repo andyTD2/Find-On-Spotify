@@ -1,0 +1,29 @@
+#findOnSpotify {
+    z-index: 10000;
+}
+
+#findOnSpotify-button {
+    height: 25px !important;
+    width: 25px !important;
+    background-color: red !important;
+    border-radius: 50% !important;
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+.findOnSpotify-closed{
+    display: none;
+}
+
+.findOnSpotify-opened{
+    display: block;
+}
+
+#findOnSpotify-contextMenu {
+    height: 400px !important;
+    width: 400px !important;
+    background-color: aqua !important;
+    z-index: 999;
+    user-select: none;
+}

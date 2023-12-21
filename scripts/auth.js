@@ -144,7 +144,9 @@ export async function exchangeAuthCodeForToken(authCode, codeVerifier)
     };
 
     const response = await fetch("https://accounts.spotify.com/api/token", payload);
-    return await response.json();
+    let tokenData = await response.json();
+    tokenData.expiration_timestamp = Date.now() + 3540000; //expires in 60 minutes but we subtract a minute to give us a small buffer...
+    return tokenData;
 }
 
 
@@ -182,7 +184,9 @@ export async function refreshAccessToken(refreshToken)
     };
 
     const response = await fetch("https://accounts.spotify.com/api/token", payload);
-    return await response.json();
+    let tokenData = await response.json();
+    tokenData.expiration_timestamp = Date.now() + 3540000; //expires in 60 minutes but we subtract a minute to give us a small buffer...
+    return tokenData;
 }
 
 

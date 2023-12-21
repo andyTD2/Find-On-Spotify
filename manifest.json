@@ -1,15 +1,30 @@
 {
-    "manifest_version": 3,
-    "name": "Find On Spotify",
-    "description": "",
-    "version": "1.0",
-    "action": {},
-    "background": {
-      "service_worker": "scripts/service-worker.js",
-      "type": "module"
-    },
-    "permissions": [
-      "identity",
-      "storage"
-    ]
+  "manifest_version": 3,
+  "name": "Find On Spotify",
+  "description": "",
+  "version": "1.0",
+  "action": {
+    "default_popup": "/views/default.html"
+  },
+  "background": {
+    "service_worker": "scripts/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "js": ["scripts/utils/debounce.js", "scripts/content.js"],
+      "css": ["/views/css/contextMenu.css"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "permissions": [
+    "identity",
+    "storage"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["views/contextMenu.html", "views/contextMenuBtn.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
   }
