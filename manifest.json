@@ -13,17 +13,17 @@
   "content_scripts": [
     {
       "js": ["scripts/utils/debounce.js", "scripts/content.js"],
-      "css": ["/views/css/contextMenu.css"],
       "matches": ["<all_urls>"]
     }
   ],
   "permissions": [
     "identity",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "web_accessible_resources": [
     {
-      "resources": ["views/contextMenu.html", "views/contextMenuBtn.html"],
+      "resources": ["views/contextMenu.html", "views/contextMenuBtn.html", "views/images/spotifyLogo.png", "views/images/plusIcon.png", "views/images/playIcon.png", "views/images/pauseIcon.png"],
       "matches": ["<all_urls>"]
     }
   ]

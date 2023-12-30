@@ -1,7 +1,34 @@
-<div id="findOnSpotify">
-    <button id="findOnSpotify-button" class="findOnSpotify-closed">
-    </button>
-    <div id="findOnSpotify-contextMenu" class="findOnSpotify-closed">
-        hello
-    </div>
-</div>
+<html>
+    <link rel="stylesheet" href="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/css/contextMenu.css">
+    <body>
+        <button id="findOnSpotify-button" class="findOnSpotify-opened">
+        </button>
+        <div id="findOnSpotify">
+            <div id="findOnSpotify-contextMenu" class="findOnSpotify-opened">
+                <div id="findOnSpotify-header">
+                    <img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/spotifyLogo.png" id="findOnSpotify-logo">
+                    <div id="findOnSpotify-volumeControl">
+                        <input type="range" min="0" max="100" value="50" id="findOnSpotify-volumeSlider">
+                        <div id="findOnSpotify-currentVolume">50</div>
+                    </div>
+                </div>
+                <div id="findOnSpotify-searchResults">
+                    <div class="findOnSpotify-resultItem">
+                        <img src="" class="findOnSpotify-resultImage">
+                        <div class="findOnSpotify-songInfo">
+                            <div class="findOnSpotify-songTitle"></div>
+                            <div class="findOnSpotify-songArtist"></div>
+                        </div>
+                        <div class="findOnSpotify-audioPlayer">
+                            <audio class="findOnSpotify-audio" src=""></audio>
+                            <button class="findOnSpotify-playAudio findOnSpotify-button"><img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/playIcon.png"></button>
+                            <button class="findOnSpotify-pauseAudio findOnSpotify-button"><img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/pauseIcon.png"></button>
+                            <button class="findOnSpotify-playlists findOnSpotify-button"><img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/plusIcon.png"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/scripts/iframe.js"></script>
+</html>

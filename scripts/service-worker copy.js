@@ -22,7 +22,7 @@ chrome.runtime.onMessage.addListener(
 
             if (accessTokenData && accessTokenData.expiration_timestamp < Date.now())
             {
-                accessTokenData = await auth.refreshAccessToken(accessTokenData.refresh_token);
+                accessTokenData = await auth.refreshAccessToken(accessTokenData.access_token);
                 await saveData({"accessTokenData" : accessTokenData});
                 console.log("refreshing token");
             }
@@ -74,16 +74,6 @@ chrome.runtime.onMessage.addListener(
                     success: true,
                     data: await user.getCurrentUserSavedTracks(accessTokenData.access_token)
                 });
-            }
-            else if (message.request == "IFRAME_LOADED")
-            {
-                console.log("background script received message");
-                chrome.tabs.sendMessage(sender.tab.id, {test: true});
-                //setTimeout(function() {chrome.runtime.sendMessage({test: true});}, 2000);
-            }
-            else if (message.request == "GET_TAB_ID")
-            {
-                sendResponse({id: sender.tab.id});
             }
           })();
         return true;

@@ -144,6 +144,13 @@ export async function exchangeAuthCodeForToken(authCode, codeVerifier)
     };
 
     const response = await fetch("https://accounts.spotify.com/api/token", payload);
+    if(!response.ok)
+    {
+        console.log("Received error code:", response.status);
+        console.log(await response.json().error_description);
+        return undefined;
+    }
+
     let tokenData = await response.json();
     tokenData.expiration_timestamp = Date.now() + 3540000; //expires in 60 minutes but we subtract a minute to give us a small buffer...
     return tokenData;
@@ -158,7 +165,7 @@ export async function exchangeAuthCodeForToken(authCode, codeVerifier)
 export async function getAccessToken()
 {
     let codeVerifierAndChallenge = await getCodeVerifierAndChallenge();
-    let url = getAuthUrl("playlist-modify-public+playlist-modify-private+user-library-modify", codeVerifierAndChallenge.codeChallenge);
+    let url = getAuthUrl("playlist-modify-public+playlist-modify-private+user-library-modify+user-library-read+playlist-read-private+user-read-email+user-read-private+playlist-read-collaborative", codeVerifierAndChallenge.codeChallenge);
     let authCode = validateAuthCode(await getAuthorization(url));
     if(!authCode) return undefined;
 
@@ -184,63 +191,28 @@ export async function refreshAccessToken(refreshToken)
     };
 
     const response = await fetch("https://accounts.spotify.com/api/token", payload);
+    if(!response.ok)
+    {
+        console.log("urlParams", urlParams);
+        console.log(response);
+        console.log("Received error code:", response.status);
+        console.log(await response.json().error_description);
+        return undefined;
+    }
     let tokenData = await response.json();
     tokenData.expiration_timestamp = Date.now() + 3540000; //expires in 60 minutes but we subtract a minute to give us a small buffer...
     return tokenData;
 }
 
 
-
-/*
-    Saves information about the access token to chrome's local storage
-    @param accessTokenData: an object containing the access token, token type, expiration time in seconds, scope of authorization, and refresh token
-    return: none
-*/
-export async function saveAccessTokenData(accessTokenData)
+export async function getUserData(accessToken)
 {
-    try {
-        await chrome.storage.local.set({accessTokenData});
-    }
-    catch(error)
-    {
-        console.log("Failed to save access token:", error);
-    }
-}
-
-
-
-/*
-    Retrieves information about the access token from chrome's local storage
-    @return: an object containing the access token, token type, expiration time in seconds, scope of authorization, and refresh token
-*/
-export async function loadAccessTokenData()
-{
-    let result = undefined;
-    try {
-        result = await chrome.storage.local.get(["accessTokenData"]);
-    }
-    catch(error)
-    {
-        console.log("Failed to retrive access token data:", error);
-        return undefined;
-    }
-    if(!result.accessTokenData) return undefined;
-    return result.accessTokenData;
-}
-
-
-
-/*
-    Deletes access token from chrome's local storage
-    @return: none
-*/
-export async function deleteAccessTokenData()
-{
-    try {
-        accessTokenData = await chrome.storage.local.remove(["accessTokenData"]);
-    }
-    catch(error)
-    {
-        console.log("Failed to delete access token data:", error);
-    }
+    const payload = {
+        headers: {
+            "Authorization": "Bearer " + accessToken
+        }
+    };
+    const response = await fetch(`https://api.spotify.com/v1/me`, payload);
+    console.log("Spotify response(user):", response);
+    return await response.json();
 }
