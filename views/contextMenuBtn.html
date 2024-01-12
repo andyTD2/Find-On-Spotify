@@ -13,20 +13,34 @@
                     </div>
                 </div>
                 <div id="findOnSpotify-searchResults">
-                    <div class="findOnSpotify-resultItem">
-                        <img src="" class="findOnSpotify-resultImage">
-                        <div class="findOnSpotify-songInfo">
-                            <div class="findOnSpotify-songTitle"></div>
-                            <div class="findOnSpotify-songArtist"></div>
+                    
+                    <template id="findOnSpotify-resultItemTemplate">
+                        <div class="findOnSpotify-resultItem">
+                            <img class="findOnSpotify-resultImage">
+                            <div class="findOnSpotify-songInfo">
+                                <div class="findOnSpotify-songTitle"><div class="findOnSpotify-songTitleNested"></div></div>
+                                <div class="findOnSpotify-songArtist"><div class="findOnSpotify-artistNested"></div></div>
+                            </div>
+                            <div class="findOnSpotify-audioPlayer">
+                                <audio class="findOnSpotify-audio"></audio>
+                                <button class="findOnSpotify-playAudio findOnSpotify-button"><img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/playIcon.png"></button>
+                                <button class="findOnSpotify-pauseAudio findOnSpotify-button"><img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/pauseIcon.png"></button>
+                                <button class="findOnSpotify-replayAudio findOnSpotify-button"><img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/replayIcon.png"></button>
+                                <button class="findOnSpotify-playAudioNull findOnSpotify-button"><img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/playIconRed.png"></button>
+                                <button class="findOnSpotify-playlists findOnSpotify-button"><img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/plusIcon.png"></button>
+                            </div>
                         </div>
-                        <div class="findOnSpotify-audioPlayer">
-                            <audio class="findOnSpotify-audio" src=""></audio>
-                            <button class="findOnSpotify-playAudio findOnSpotify-button"><img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/playIcon.png"></button>
-                            <button class="findOnSpotify-pauseAudio findOnSpotify-button"><img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/pauseIcon.png"></button>
-                            <button class="findOnSpotify-playlists findOnSpotify-button"><img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/plusIcon.png"></button>
-                        </div>
-                    </div>
+                    </template>
+
                 </div>
+            </div>
+        </div>
+        <div id="findOnSpotify-saveTrackMenu">
+            <div id="findOnSpotify-saveTrackMenuHeader">Add to...</div>
+            <div id="findOnSpotify-saveTrackMenuPlaylists">
+                <template id="findOnSpotify-saveTrackMenuTemplate">
+                    <div class="findOnSpotify-saveTrackMenuPlaylistItem"></div>
+                </template>
             </div>
         </div>
     </body>

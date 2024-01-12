@@ -27,6 +27,8 @@ function insertIFrame(pos)
     iframe.style.left = `${pos.right + window.scrollX}px`;
     iframe.style.top = `${pos.bottom + window.scrollY}px`;
     iframe.style.backgroundColor = "aqua";
+    iframe.style.overflow = "scroll";
+    iframe.style.zIndex = 10000;
     resizeIFrame(iframe, "25px", "25px");
     document.body.appendChild(iframe);
     attachCloseOnClickListener(iframe);
@@ -43,13 +45,16 @@ function attachIFrameOnLoadListener(iframe)
 }
 */
 
+
 function attachCloseOnClickListener(element)
 {
-    document.addEventListener("mousedown", function(event) {
+    console.log("attaching listener");
+    document.addEventListener("mousedown", function removeMenuOnOutsideClick(event) {
         if(!element.contains(event.target))
         {
             console.log("clickedoutside");
             element.remove();
+            document.removeEventListener("mousedown", removeMenuOnOutsideClick);
         }
     })
 }

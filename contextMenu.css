@@ -6,6 +6,7 @@ body {
 }
 
 #findOnSpotify {
+    z-index: 10000;
     color: white;
 }
 
@@ -20,21 +21,13 @@ body {
     background: none;
 }
 
-.findOnSpotify-closed{
-    display: none;
-}
-
-.findOnSpotify-opened{
-    display: block;
-}
-
 #findOnSpotify-contextMenu {
-    display: none;
     height: 400px !important;
     width: 400px !important;
     background-color: rgb(25, 24, 28) !important;
+    z-index: 999;
     user-select: none;
-    border-radius: 15px !important;
+    border-radius: 20px !important;
 }
 
 #findOnSpotify-header {
@@ -88,12 +81,9 @@ body {
 }
 
 #findOnSpotify-searchResults {
-    padding-top: 5px;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding: 15px;
     overflow-y: scroll;
-    height: 335px;
-    width: 370px;
+    height: 320px;
 }
 
 #findOnSpotify-searchResults::-webkit-scrollbar {
@@ -104,7 +94,6 @@ body {
     display:flex;
     flex-direction: row;
     overflow-x: hidden;
-    margin-top: 10px;
 }
 
 #findOnSpotify-logo {
@@ -114,6 +103,12 @@ body {
     margin-bottom: auto;
 }
 
+
+
+
+
+
+
 .findOnSpotify-resultImage {
     width: 48px;
     height: 48px;
@@ -121,40 +116,33 @@ body {
 
 .findOnSpotify-songInfo {
     margin-left: 15px;
-    margin-right: 15px;
+    overflow: hidden;
     text-wrap: nowrap;
-    overflow-x: hidden;
 }
+
+
+.findOnSpotify-audioPlayer {
+    margin-left: auto;
+}
+
+
+
+
+
+
+
+
+
 
 
 .findOnSpotify-songTitle {
     font-size: 1.6rem;
-    overflow-x: hidden;
-}
-
-.findOnSpotify-autoScroll:hover {  
-    animation: scrolling 8s .2s linear 1;
-  }
-
-
-  @keyframes scrolling {
-    from { left: 0; transform: translate3d(0, 0, 0); }
-    to { transform: translate3d(-100%, 0, 0); }
-  }
-
-
-.findOnSpotify-songTitle::-webkit-scrollbar {
-    display: none;
+    line-height: 1;
+    margin-bottom: 3px;
 }
 
 .findOnSpotify-songArtist {
     font-size: .8rem;
-    overflow-x: scroll;
-}
-
-.findOnSpotify-songArtist::-webkit-scrollbar
-{
-    display: none;
 }
 
 .findOnSpotify-playlists{
@@ -170,9 +158,6 @@ body {
     height: 24px;
 }
 
-.findOnSpotify-audioPlayer {
-    margin-left: auto;
-}
 
 .findOnSpotify-button {
     border: none;
@@ -180,17 +165,6 @@ body {
     background-color: transparent;
     width: 24px;
     height: 24px;
-}
-
-.findOnSpotify-playAudioNull {
-    display: none;
-}
-
-.findOnSpotify-playAudioNull img{
-    display: inherit;
-    width: 24px;
-    height: 24px;
-    object-fit: fill;
 }
 
 .findOnSpotify-playAudio {
@@ -206,17 +180,6 @@ body {
 
 .findOnSpotify-pauseAudio {
     display: none;
-}
-
-.findOnSpotify-replayAudio {
-    display: none;
-}
-
-.findOnSpotify-replayAudio img {
-    display: inherit;
-    width: 24px;
-    height: 24px;
-    object-fit: fill;
 }
 
 .findOnSpotify-pauseAudio img{
