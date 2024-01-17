@@ -173,7 +173,6 @@ export async function getAccessToken()
 }
 
 
-
 /*
     Acquires a new access token given a refresh token
     @param refreshToken: a refresh token provided by an earlier call to spotify's token api
@@ -193,26 +192,9 @@ export async function refreshAccessToken(refreshToken)
     const response = await fetch("https://accounts.spotify.com/api/token", payload);
     if(!response.ok)
     {
-        console.log("urlParams", urlParams);
-        console.log(response);
-        console.log("Received error code:", response.status);
-        console.log(await response.json().error_description);
         return undefined;
     }
     let tokenData = await response.json();
     tokenData.expiration_timestamp = Date.now() + 3540000; //expires in 60 minutes but we subtract a minute to give us a small buffer...
     return tokenData;
-}
-
-
-export async function getUserData(accessToken)
-{
-    const payload = {
-        headers: {
-            "Authorization": "Bearer " + accessToken
-        }
-    };
-    const response = await fetch(`https://api.spotify.com/v1/me`, payload);
-    console.log("Spotify response(user):", response);
-    return await response.json();
 }

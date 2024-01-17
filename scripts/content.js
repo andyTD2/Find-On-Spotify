@@ -1,8 +1,6 @@
 (async () => 
 {
     attachMsgListener();
-    const id = await getTabId();
-
     let debouncedOnSelect = debounce(onSelect);
     document.addEventListener("selectionchange", async function(event){
         await debouncedOnSelect();
@@ -35,15 +33,6 @@ function insertIFrame(pos)
     return iframe;
 }
 
-
-/*
-function attachIFrameOnLoadListener(iframe)
-{
-    iframe.addEventListener("load", function() {
-        chrome.runtime.sendMessage({request: "IFRAME_LOADED"});
-    });
-}
-*/
 
 
 function attachCloseOnClickListener(element)
