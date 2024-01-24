@@ -24,8 +24,14 @@ export class User
     */
     async fetchAuthorization()
     {
-        this.setAccessToken(await auth.getAccessToken());
-        await saveData({"accessTokenData": this.accessTokenData});
+        let token = await auth.getAccessToken();
+
+        if(token)
+        {
+            this.setAccessToken(token);
+            await saveData({"accessTokenData": this.accessTokenData});
+        }
+        return token;
     }
 
     getUserProfileData()
@@ -61,11 +67,12 @@ export class User
         {
             this.setUserProfileData(await response.json())
             await saveData({"userProfileData": this.userData});
-            return;
+            return this.userData;
         }
 
         const error = (await response.json()).error;
         console.log(`Playlist lookup failed. Received error code ${error.status} - ${error.message}`);
+        return undefined;
     }
 
     /*
@@ -176,6 +183,34 @@ export class User
         console.log(`Add to playlist failed. Received error code ${error.status} - ${error.message}`);
         return undefined;
     }
+
+    /*
+        Submits a search query to spotify's api
+        @param query: the search query
+        @param accessToken: the user's access token required by spotify
+        @return an object containing data related to the results including
+        an array of 20 tracks that best match the search query. Returns undefined
+        on fail.
+    */
+    async searchTrack(query)
+    {
+        query = query.replace(/[{}\[\]]/g, '');
+        const payload = {
+            headers: {
+                "Authorization": "Bearer " + this.accessTokenData.access_token
+            }
+        };
+        const response = await fetch(`https://api.spotify.com/v1/search?q=${query}&type=track`, payload);
+
+        if(response.ok)
+        {
+            return await response.json();
+        }
+        const error = (await response.json()).error;
+        console.log(`Search query failed. Received error code ${error.status} - ${error.message}`);
+        return undefined;
+    }
+
 
     /*
         Checks if access token has expired

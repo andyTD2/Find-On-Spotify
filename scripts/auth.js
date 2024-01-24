@@ -100,7 +100,7 @@ export async function getAuthorization(authURL)
         });
     } catch(error)
     {
-        console.log(error);
+        console.log("Authorization failure.", error);
     }
 
     return authResponse;
@@ -146,7 +146,7 @@ export async function exchangeAuthCodeForToken(authCode, codeVerifier)
     const response = await fetch("https://accounts.spotify.com/api/token", payload);
     if(!response.ok)
     {
-        console.log("Received error code:", response.status);
+        console.log("Authorization error.", response.status);
         console.log(await response.json().error_description);
         return undefined;
     }

@@ -1,39 +1,122 @@
-class contextMenu {
-
-    constructor(id, width, height)
+function setAutoScrollOnOverflow(element)
+{
+    if (element.scrollWidth > element.clientWidth)
     {
-        this.id = id;
-        this.width = width;
-        this.height = height;
-        this.currentTrackUri = null;
+        element.classList.add("findOnSpotify-autoScroll");
+    }
+}
 
-        this.setOpenContextMenuBtnListener();
+class playlistMenu {
+    constructor(playlistList)
+    {
+        this.currentTrackUri = undefined;
+        this.init(playlistList);
+    }
+
+    setCurrentTrackUri(trackUri)
+    {
+        this.currentTrackUri = trackUri;
+    }
+
+    openPlaylistMenu(event) 
+    {
+        let container = document.getElementById("findOnSpotify-contextMenu").getBoundingClientRect();
+        let menu = document.getElementById("findOnSpotify-saveTrackMenu");
+        let menuWidth = menu.offsetWidth;
+        let menuHeight = menu.offsetHeight;
+
+        menu.style.left = (menuWidth + event.clientX > container.right) ? event.clientX - menuWidth : event.clientX;
+        menu.style.top = (menuHeight + event.clientY > container.bottom) ? event.clientY - menuHeight : event.clientY;
+
+        menu.style.display = "block";
     }
 
 
-    setAutoScrollOnOverflow(element)
+    init(playlistList)
     {
-        if (element.scrollWidth > element.clientWidth)
+        let playlistContainer = document.querySelector("#findOnSpotify-saveTrackMenuPlaylists");
+        let template = document.querySelector("#findOnSpotify-saveTrackMenuTemplate");
+
+        for(let playlist of playlistList)
         {
-            element.classList.add("findOnSpotify-autoScroll");
+            const clone = template.content.cloneNode(true);
+            const playlistItem = clone.querySelector(".findOnSpotify-saveTrackMenuPlaylistItem");
+            playlistItem.innerText = playlist.name;
+            
+            playlistContainer.appendChild(clone);
+            this.setSaveToPlaylistListener(playlistItem, playlist.id);
         }
     }
 
-    setVolume(newVolume)
+    setSaveToPlaylistListener(playlistElement, playlistId)
     {
-        document.getElementById("findOnSpotify-currentVolume").innerText = newVolume;
-        const listOfAudioPlayers = document.getElementsByClassName("findOnSpotify-audio");
-        for(let audioPlayer of listOfAudioPlayers)
-        {
-            audioPlayer.volume = newVolume / 100;
-        }
+        playlistElement.addEventListener("click", async () => {
+            await chrome.runtime.sendMessage({request: "ADD_TO_PLAYLIST", playlistId: playlistId, trackUri: this.currentTrackUri})
+        })
+    }
+}
+
+class songItem {
+    constructor(trackImageUrl, previewUrl, trackName, trackArtists, trackUri, playlistMenu)
+    {
+        this.trackImageUrl = trackImageUrl;
+        this.previewUrl = previewUrl;
+        this.trackName = trackName;
+        this.trackArtists = trackArtists;
+        this.trackUri = trackUri;
+        this.playlistMenu = playlistMenu;
+        this.htmlElement = this.init();
     }
 
-    setVolumeControlListener(slider)
+    init()
     {
-        slider.addEventListener("input", () =>
+        let template = document.querySelector("#findOnSpotify-resultItemTemplate");
+        let clone = template.content.cloneNode(true);
+
+        clone.querySelector(".findOnSpotify-resultImage").src = this.trackImageUrl;
+        clone.querySelector(".findOnSpotify-songTitleNested").innerText = this.trackName;
+        clone.querySelector(".findOnSpotify-artistNested").innerText = this.trackArtists;
+
+        if(this.previewUrl)
         {
-            this.setVolume(slider.value);
+            const audioPlayer = clone.querySelector(".findOnSpotify-audio");
+            const playBtn = clone.querySelector(".findOnSpotify-playAudio");
+            const pauseBtn = clone.querySelector(".findOnSpotify-pauseAudio");
+            const replayBtn = clone.querySelector(".findOnSpotify-replayAudio");
+
+            audioPlayer.src = this.previewUrl;
+            this.setPlayBtnListener(playBtn, pauseBtn, audioPlayer);
+            this.setPauseBtnListener(pauseBtn, playBtn, audioPlayer);
+            this.setAudioEndedListener(pauseBtn, replayBtn, audioPlayer);
+            this.setReplayBtnListener(replayBtn, pauseBtn, audioPlayer);
+        }
+        else
+        {
+            clone.querySelector(".findOnSpotify-playAudio").style.display = "none";
+            clone.querySelector(".findOnSpotify-playAudioNull").style.display = "block";
+        }
+
+
+        this.setOpenSaveTrackMenuListener(clone.querySelector(".findOnSpotify-playlists"), this.trackUri);
+        return clone.firstElementChild;
+    }
+
+    getHtmlElement()
+    {
+        return this.htmlElement;
+    }
+
+    setTrackVolume(newVolume)
+    {
+        this.htmlElement.querySelector(".findOnSpotify-audio").volume = newVolume / 100;
+    }
+
+    setOpenSaveTrackMenuListener(btn, trackUri)
+    {
+        btn.addEventListener("click", (event) =>
+        {
+            this.playlistMenu.setCurrentTrackUri(trackUri);
+            this.playlistMenu.openPlaylistMenu(event);
         })
     }
 
@@ -73,106 +156,57 @@ class contextMenu {
     }
 
 
-    setOpenSaveTrackMenuListener(btn, trackUri)
+}
+
+class contextMenu {
+
+    constructor(id, width, height, borderRadius)
     {
-        btn.addEventListener("click", (event) =>
-        {
-            this.currentTrackUri = trackUri;
-            let container = document.getElementById("findOnSpotify-contextMenu").getBoundingClientRect();
-            let menu = document.getElementById("findOnSpotify-saveTrackMenu");
-            let menuWidth = menu.offsetWidth;
-            let menuHeight = menu.offsetHeight;
-    
-            menu.style.left = (menuWidth + event.clientX > container.right) ? event.clientX - menuWidth : event.clientX;
-            menu.style.top = (menuHeight + event.clientY > container.bottom) ? event.clientY - menuHeight : event.clientY;
-    
-            menu.style.display = "block";
-        })
+        this.id = id;
+        this.width = width;
+        this.height = height;
+        this.borderRadius = borderRadius;
+        this.tracks = [];
+
+        this.setOpenContextMenuBtnListener();
     }
 
-    populateTrackList(trackList)
+    setVolume(newVolume)
     {
-        let trackListContainer = document.getElementById("findOnSpotify-searchResults");
-        let template = document.querySelector("#findOnSpotify-resultItemTemplate");
-
-        for (let i = 0; i < trackList.length; ++i)
+        document.getElementById("findOnSpotify-currentVolume").innerText = newVolume;
+        for (let track of this.tracks)
         {
-            let clone = template.content.cloneNode(true);
-
-            clone.querySelector(".findOnSpotify-resultImage").src = 
-                (trackList[i].album.images.length > 0) ? trackList[i].album.images[0].url : "/views/images/placeholder.png";
-            clone.querySelector(".findOnSpotify-songTitleNested").innerText = trackList[i].name;
-            
-            let artists = trackList[i].artists[0].name;
-            for (let j = 1; j < trackList[i].artists.length; ++j)
-            {
-                artists += ", " + trackList[i].artists[j].name
-            }
-            clone.querySelector(".findOnSpotify-artistNested").innerText = artists;
-            
-            if(trackList[i].preview_url)
-            {
-                const audioPlayer = clone.querySelector(".findOnSpotify-audio");
-                const playBtn = clone.querySelector(".findOnSpotify-playAudio");
-                const pauseBtn = clone.querySelector(".findOnSpotify-pauseAudio");
-                const replayBtn = clone.querySelector(".findOnSpotify-replayAudio");
-
-                audioPlayer.src = trackList[i].preview_url;
-                this.setPlayBtnListener(playBtn, pauseBtn, audioPlayer);
-                this.setPauseBtnListener(pauseBtn, playBtn, audioPlayer);
-                this.setAudioEndedListener(pauseBtn, replayBtn, audioPlayer);
-                this.setReplayBtnListener(replayBtn, pauseBtn, audioPlayer);
-            }
-            else
-            {
-                clone.querySelector(".findOnSpotify-playAudio").style.display = "none";
-                clone.querySelector(".findOnSpotify-playAudioNull").style.display = "block";
-            }
-
-            this.setOpenSaveTrackMenuListener(clone.querySelector(".findOnSpotify-playlists"), trackList[i].uri);
-            let songTitle = clone.querySelector(".findOnSpotify-songTitleNested");
-            let songArtist = clone.querySelector(".findOnSpotify-artistNested");
-
-
-            trackListContainer.appendChild(clone);
-            this.setAutoScrollOnOverflow(songTitle);
-            this.setAutoScrollOnOverflow(songArtist);
+            track.setTrackVolume(newVolume);
         }
     }
 
-    setSaveToPlaylistListener(playlistElement, playlistId)
+    setVolumeControlListener(slider)
     {
-        playlistElement.addEventListener("click", async () => {
-            console.log(playlistElement, playlistId, this.currentTrackUri);
-            console.log("added playlist response:", (await chrome.runtime.sendMessage({request: "ADD_TO_PLAYLIST", playlistId: playlistId, trackUri: this.currentTrackUri})) )
+        slider.addEventListener("input", () =>
+        {
+            this.setVolume(slider.value);
         })
     }
 
-
-    populatePlaylists(playlistList)
+    setIFrameSize(width, height)
     {
-        let playlistContainer = document.querySelector("#findOnSpotify-saveTrackMenuPlaylists");
-        let template = document.querySelector("#findOnSpotify-saveTrackMenuTemplate");
-
-        console.log(playlistList);
-        for(let playlist of playlistList)
-        {
-            const clone = template.content.cloneNode(true);
-            const playlistItem = clone.querySelector(".findOnSpotify-saveTrackMenuPlaylistItem");
-            playlistItem.innerText = playlist.name;
-            
-            //playlistItem.addEventListener("click", () => {
-            //    console.log("Add to playlist:", playlist.name, this.currentTrack);
-            //});
-
-            playlistContainer.appendChild(clone);
-            this.setSaveToPlaylistListener(playlistItem, playlist.id);
-        }
+        this.width = width;
+        this.height = height;
     }
 
-    async setIFrameSize(id, width, height)
+    async requestIFrameResize()
     {
-        await chrome.tabs.sendMessage(id, {request: "RESIZE_IFRAME", width: width, height: height});
+        await chrome.tabs.sendMessage(this.id, {request: "SET_IFRAME_SIZE", width: this.width, height: this.height});
+    }
+
+    setIFrameRadius(radius)
+    {
+        this.borderRadius = radius;
+    }
+
+    async requestIFrameRadiusResize()
+    {
+        await chrome.tabs.sendMessage(this.id, {request: "SET_IFRAME_RADIUS", radius: this.borderRadius});
     }
     
     async getSelection(id)
@@ -204,25 +238,56 @@ class contextMenu {
         if(response.success) return response.data;
     }
 
+    async displayMenu()
+    {
+        document.getElementById("findOnSpotify-button").style.display = "none";
+        document.getElementById("findOnSpotify-contextMenu").style.display = "block";
+        await this.requestIFrameRadiusResize();
+        await this.requestIFrameResize();
+    }
+
+    populateTrackList(trackList, sharedPlaylist)
+    {
+        let trackListContainer = document.getElementById("findOnSpotify-searchResults");
+        for (let i = 0; i < trackList.length; ++i)
+        {
+            let artists = trackList[i].artists[0].name;
+            for (let j = 1; j < trackList[i].artists.length; ++j)
+            {
+                artists += ", " + trackList[i].artists[j].name
+            }
+            
+            
+            let track = new songItem(
+                (trackList[i].album.images.length > 0) ? trackList[i].album.images[0].url : "/views/images/placeholder.png",
+                trackList[i].preview_url,
+                trackList[i].name,
+                artists,
+                trackList[i].uri,
+                sharedPlaylist);
+
+            let trackHtmlElement = track.getHtmlElement();
+            trackListContainer.appendChild(trackHtmlElement);
+            setAutoScrollOnOverflow(trackHtmlElement.querySelector(".findOnSpotify-songTitleNested"));
+            setAutoScrollOnOverflow(trackHtmlElement.querySelector(".findOnSpotify-artistNested"));
+            this.tracks.push(track);
+
+        }
+    }
+
     async openContextMenu(event)
     {
-        let btn = document.getElementById("findOnSpotify-button");
-        let menu = document.getElementById("findOnSpotify-contextMenu");
-
-        btn.style.display = "none";
-        menu.style.display = "block";
-        this.setIFrameSize(this.id, this.width, this.height);
-
+        await this.displayMenu();
         const selection = await this.getSelection(this.id);
         event.stopPropagation();
         if(selection.length < 1) return;
 
         const trackData = await this.query(selection);
+        const sharedPlaylist = new playlistMenu(await this.getPlaylists());
         if(trackData) 
-        {this.populateTrackList(trackData); console.log(trackData)}
-
-        let playlistData = await this.getPlaylists();
-        if(playlistData) this.populatePlaylists(playlistData);
+        {
+            this.populateTrackList(trackData, sharedPlaylist);
+        }
 
         this.setVolumeControlListener(document.getElementById("findOnSpotify-volumeSlider"));
     }
@@ -240,13 +305,6 @@ class contextMenu {
 
 
 
-
-
-
-
-
-
-
 async function getTabId()
 {
     return (await chrome.runtime.sendMessage({request: "GET_TAB_ID"})).id;
@@ -254,6 +312,6 @@ async function getTabId()
 
 async function start()
 {
-    const x = new contextMenu(await getTabId(), "400px", "400px");
+    const x = new contextMenu(await getTabId(), "400px", "400px", "15px");
 }
 start();

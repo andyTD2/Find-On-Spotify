@@ -1,78 +1,134 @@
-(async () => 
+loadContent();
+
+
+
+/*
+    Entry point. Set message handler and on select listener
+*/
+async function loadContent()
 {
-    attachMsgListener();
+    await attachMsgListener();
     let debouncedOnSelect = debounce(onSelect);
     document.addEventListener("selectionchange", async function(event){
         await debouncedOnSelect();
     });
-})();
+}
 
-
-function resizeIFrame(iframe, width, height)
+/*
+    Resize the injected iframe
+    @param iframe: the iframe element to adjust
+    @param width: the resize width including size units
+    @param height: the resize height including size units
+*/
+function setIframeSize(iframe, width, height)
 {
     iframe.style.width = width;
     iframe.style.height = height;
 }
 
+/*
+    Set the injected iframe's radius
+    @param iframe: the iframe element to adjust
+    @param radius: the new radius
+*/
+function setIframeRadius(iframe, radius)
+{
+    iframe.style.borderRadius = radius;
+}
 
+/*
+    Create and insert iframe
+    param pos: an object containing the following positional data
+        right: the right side of the selected text
+        bottom: the bottom of the selected text
+*/
 function insertIFrame(pos)
 {
     const iframe = document.createElement("iframe");
-    iframe.style.all = "unset";
     iframe.id = "findOnSpotify-iFrame";
     iframe.src = "chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/contextMenuBtn.html";
+
+
+    setIframeRadius(iframe, "50%");
+    setIframeSize(iframe, "25px", "25px");
+    iframe.style.borderWidth = "0px";
     iframe.style.position = "absolute";
     iframe.style.left = `${pos.right + window.scrollX}px`;
     iframe.style.top = `${pos.bottom + window.scrollY}px`;
-    iframe.style.backgroundColor = "aqua";
+    iframe.style.backgroundColor = "transparent";
     iframe.style.overflow = "scroll";
     iframe.style.zIndex = 10000;
-    resizeIFrame(iframe, "25px", "25px");
+
+    
     document.body.appendChild(iframe);
     attachCloseOnClickListener(iframe);
     return iframe;
 }
 
 
-
+/*
+    Sets a listener that removes removes an element
+    when the user clicks off the element.
+    param element: the element to remove
+*/
 function attachCloseOnClickListener(element)
 {
-    console.log("attaching listener");
     document.addEventListener("mousedown", function removeMenuOnOutsideClick(event) {
         if(!element.contains(event.target))
         {
-            console.log("clickedoutside");
             element.remove();
             document.removeEventListener("mousedown", removeMenuOnOutsideClick);
         }
     })
 }
 
-
-
-
-function attachMsgListener()
+/*
+    Listens to and responds to messages received by the iframe or background scripts.
+*/
+async function attachMsgListener()
 {
+    //import the messageHandler class
+    const messageHandler = (await import(chrome.runtime.getURL("scripts/messageHandler.js"))).messageHandler;
+
+    let msgHandler = new messageHandler(
+        {
+            'SET_IFRAME_SIZE': 
+                (params) => {
+                    setIframeSize(document.getElementById("findOnSpotify-iFrame"), params.width, params.height);
+                },
+            
+            'GET_SELECTION':
+                (params) => {
+                    params.sendResponse({text: window.getSelection().toString()});
+                },
+
+            'SET_IFRAME_RADIUS':
+                (params) => {
+                    setIframeRadius(document.getElementById("findOnSpotify-iFrame"), params.radius);
+                }
+        }
+    );
+
+
     chrome.runtime.onMessage.addListener(
         function(message, sender, sendResponse) {
-            console.log("received from content.js:", message);
-
-            if(message.request == "RESIZE_IFRAME")
-            {
-                console.log("resizing iframe");
-                resizeIFrame(document.getElementById("findOnSpotify-iFrame"), message.width, message.height);
-            }
-            else if (message.request == "GET_SELECTION")
-            {
-                sendResponse({text: window.getSelection().toString()});
-            }
+            msgHandler.handleFunction({sender, sendResponse, ...message});
     });
 }
 
+/*
+    Get the bottom right position of the selected text,
+    which is where the iframe will be inserted
+    @param selection: the selected text
+*/
 function getBtnPosition(selection)
 {
     const range = selection.getRangeAt(0).cloneRange();
     range.collapse(false);
+
+    //we insert an empty span and get the bounding box of that span to determine
+    //the position. This seems to be more robust than simply getting the bounding
+    //box of the selection itself.
     const empty = document.createElement("span");
     range.insertNode(empty);
     const {right, bottom} = empty.getBoundingClientRect();
@@ -80,6 +136,10 @@ function getBtnPosition(selection)
     return {right, bottom};
 }
 
+/*
+    Removes any existing iframe and injects a new iframe into the page
+    based off the selection. Should be called everytime the selection changes.
+*/
 async function onSelect(){
     if (!chrome.runtime?.id)
         return;
@@ -101,24 +161,4 @@ async function onSelect(){
             insertIFrame(getBtnPosition(selection))
         }
     }
-}
-
-
-
-
-
-
-function display(element)
-{
-    element.style.display = "block";
-}
-
-function hide(element)
-{
-    element.style.display = "none";
-}
-
-async function getTabId()
-{
-    return (await chrome.runtime.sendMessage({request: "GET_TAB_ID"})).id;
 }

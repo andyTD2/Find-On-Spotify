@@ -1,6 +1,5 @@
-import * as track from "/scripts/track.js";
 import {User} from "/scripts/user.js";
-import {loadData, saveData, deleteData} from "/scripts/utils/storage.js";
+import {loadData} from "/scripts/utils/storage.js";
 import { messageHandler } from "/scripts/messageHandler.js";
 
 
@@ -54,9 +53,10 @@ async function main()
         'LINK_ACCOUNT':
             async (params) => {
                 try {
-                    await user.fetchAuthorization();
-                    await user.fetchUserProfileData();
-                    params.sendResponse({success : true});
+                    if (await user.fetchAuthorization() && await user.fetchUserProfileData())
+                        params.sendResponse({success : true});
+                    else
+                        params.sendResponse({success: false});
                 }
                 catch(error)
                 {
@@ -67,9 +67,11 @@ async function main()
         'SEARCH_QUERY':
             async (params) => {
                 try {
+                    let result = await user.searchTrack(params.query);
                     params.sendResponse({
-                        success: true, 
-                        data: await track.searchTrack(params.query, (await user.getAccessToken()).access_token)});
+                        success: result ? true : false, 
+                        data: result});
+
                 }
                 catch(error)
                 {
@@ -80,9 +82,10 @@ async function main()
         'GET_PLAYLISTS': 
             async (params) => {
                 try {
+                    let result = await user.getCurrentUserPlaylists();
                     params.sendResponse({
-                        success: true,
-                        data: await user.getCurrentUserPlaylists()})
+                        success: result ? true : false, 
+                        data: result})
                 }
                 catch(error)
                 {
@@ -93,9 +96,10 @@ async function main()
         'GET_USER': 
             async (params) => {
                 try {
+                    let result = user.getUserProfileData();
                     params.sendResponse({
-                        success: true,
-                        data: await user.getUserProfileData()});
+                        success: result ? true : false,
+                        data: result});
                 }
                 catch(error)
                 {
@@ -106,9 +110,10 @@ async function main()
         'GET_SAVED_TRACKS':
             async (params) => {
                 try {
+                    let result = await user.getSavedTracks();
                     params.sendResponse({
-                        success: true,
-                        data: await user.getSavedTracks()});
+                        success: result ? true : false,
+                        data: result});
                 }
                 catch(error)
                 {
@@ -129,9 +134,10 @@ async function main()
         'ADD_TO_PLAYLIST':
             async (params) => {
                 try {
+                    let result = await user.addTrackToPlaylist(params.playlistId, params.trackUri);
                     params.sendResponse({
-                        success: true,
-                        data: await user.addTrackToPlaylist(params.playlistId, params.trackUri)})
+                        success: result ? true : false,
+                        data: result});
                 }
                 catch(error)
                 {
