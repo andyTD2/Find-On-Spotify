@@ -1,5 +1,21 @@
 loadContent();
 
+function getClampedPosToBox(innerBoundingBox, outerBoundingBox)
+{
+    console.log("innerBoundingBox.right", innerBoundingBox.right, "outBoundingRight", outerBoundingBox.right);
+    console.log("innerBoundingBox.bottom", innerBoundingBox.bottom, "outBoundingBottom", outerBoundingBox.bottom);
+    return {
+        left: (innerBoundingBox.right > outerBoundingBox.right) ? outerBoundingBox.right - (innerBoundingBox.right - innerBoundingBox.left) : innerBoundingBox.left,
+        top: (innerBoundingBox.bottom > outerBoundingBox.bottom) ? outerBoundingBox.bottom - (innerBoundingBox.bottom - innerBoundingBox.top) : innerBoundingBox.top
+    }
+}
+/*
+    return {
+        left: (innerBoundingBox.right > window.innerWidth) ? window.innerWidth - width : left,
+        top: (bottom > window.innerHeight) ? window.innerHeight - height : bottom - height
+    }
+*/
+
 
 
 /*
@@ -42,7 +58,7 @@ function setIframeRadius(iframe, radius)
         right: the right side of the selected text
         bottom: the bottom of the selected text
 */
-function insertIFrame(pos)
+function insertIFrame(pos, width, height)
 {
     const iframe = document.createElement("iframe");
     iframe.id = "findOnSpotify-iFrame";
@@ -50,18 +66,32 @@ function insertIFrame(pos)
 
 
     setIframeRadius(iframe, "50%");
-    setIframeSize(iframe, "25px", "25px");
+    setIframeSize(iframe, width, height);
     iframe.style.borderWidth = "0px";
     iframe.style.position = "absolute";
-    iframe.style.left = `${pos.right + window.scrollX}px`;
-    iframe.style.top = `${pos.bottom + window.scrollY}px`;
     iframe.style.backgroundColor = "transparent";
     iframe.style.overflow = "scroll";
     iframe.style.zIndex = 10000;
 
-    
-    document.body.appendChild(iframe);
+    iframe.style.visibility = "hidden";
+    document.body.appendChild(iframe);    
+    const clampedPos = getClampedPosToBox(
+                    {
+                        left: pos.right + window.scrollX, 
+                        top: pos.bottom + window.scrollY,
+                        right: pos.right + window.scrollX + iframe.offsetWidth,
+                        bottom: pos.bottom + window.scrollY + iframe.offsetHeight
+                    }, 
+                    {
+                        right: document.documentElement.clientWidth + window.scrollX,
+                        bottom: document.documentElement.clientHeight + window.scrollY
+                    });
+
+    iframe.style.left = `${clampedPos.left}px`;
+    iframe.style.top = `${clampedPos.top}px`;
+
     attachCloseOnClickListener(iframe);
+    iframe.style.visibility = "visible";
     return iframe;
 }
 
@@ -94,7 +124,24 @@ async function attachMsgListener()
         {
             'SET_IFRAME_SIZE': 
                 (params) => {
-                    setIframeSize(document.getElementById("findOnSpotify-iFrame"), params.width, params.height);
+                    const iframeElement = document.getElementById("findOnSpotify-iFrame");
+                    setIframeSize(iframeElement, params.width, params.height);
+
+                    const bounds = iframeElement.getBoundingClientRect();
+                    const clampedPos = getClampedPosToBox(
+                        {
+                            left: bounds.left + window.scrollX, 
+                            top: bounds.top + window.scrollY,
+                            right: bounds.left + window.scrollX + iframeElement.offsetWidth,
+                            bottom: bounds.top + window.scrollY + iframeElement.offsetHeight
+                        }, 
+                        {
+                            right: document.documentElement.clientWidth + window.scrollX,
+                            bottom: document.documentElement.clientHeight + window.scrollY
+                        });
+
+                    iframeElement.style.top = `${clampedPos.top}px`;
+                    iframeElement.style.left = `${clampedPos.left}px`;
                 },
             
             'GET_SELECTION':
@@ -158,7 +205,7 @@ async function onSelect(){
         let selectionText = selection.toString();
         if(selectionText.length > 0)
         {
-            insertIFrame(getBtnPosition(selection))
+            insertIFrame(getBtnPosition(selection), "2.1875rem", "2.1875rem");
         }
     }
 }

@@ -1,7 +1,8 @@
 <html>
     <link rel="stylesheet" href="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/css/contextMenu.css">
     <body>
-        <button id="findOnSpotify-button" class="findOnSpotify-opened">
+        <button id="findOnSpotify-openMenuButton" class="findOnSpotify-opened">
+            <img src="chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/images/spotifyLogoInverted.png">
         </button>
         <div id="findOnSpotify">
             <div id="findOnSpotify-contextMenu" class="findOnSpotify-opened">
@@ -41,7 +42,7 @@
             <div id="findOnSpotify-saveTrackMenuHeader">Add to...</div>
             <div id="findOnSpotify-saveTrackMenuPlaylists">
                 <template id="findOnSpotify-saveTrackMenuTemplate">
-                    <div class="findOnSpotify-saveTrackMenuPlaylistItem"></div>
+                    <div class="findOnSpotifyPlaylistContainer"><div class="findOnSpotify-saveTrackMenuPlaylistItem"></div></div>
                 </template>
             </div>
         </div>

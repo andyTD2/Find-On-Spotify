@@ -23,7 +23,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["views/contextMenu.html", "views/contextMenuBtn.html", "views/images/spotifyLogo.png", "views/images/plusIcon.png", "views/images/playIcon.png", "views/images/pauseIcon.png"],
+      "resources": ["scripts/messageHandler.js", "scripts/playlistMenu.js", "views/contextMenu.html", "views/contextMenuBtn.html", "views/images/spotifyLogo.png", "views/images/plusIcon.png", "views/images/playIcon.png", "views/images/pauseIcon.png"],
       "matches": ["<all_urls>"]
     }
   ]
