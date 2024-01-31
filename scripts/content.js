@@ -2,6 +2,7 @@ loadContent();
 
 function getClampedPosToBox(innerBoundingBox, outerBoundingBox)
 {
+    console.log("inner", innerBoundingBox);
     console.log("innerBoundingBox.right", innerBoundingBox.right, "outBoundingRight", outerBoundingBox.right);
     console.log("innerBoundingBox.bottom", innerBoundingBox.bottom, "outBoundingBottom", outerBoundingBox.bottom);
     return {
@@ -38,8 +39,8 @@ async function loadContent()
 */
 function setIframeSize(iframe, width, height)
 {
-    iframe.style.width = width;
-    iframe.style.height = height;
+    iframe.style.width = `${width}`;
+    iframe.style.height = `${height}`;
 }
 
 /*
@@ -58,7 +59,7 @@ function setIframeRadius(iframe, radius)
         right: the right side of the selected text
         bottom: the bottom of the selected text
 */
-function insertIFrame(pos, width, height)
+function insertIFrame(pos)
 {
     const iframe = document.createElement("iframe");
     iframe.id = "findOnSpotify-iFrame";
@@ -66,32 +67,18 @@ function insertIFrame(pos, width, height)
 
 
     setIframeRadius(iframe, "50%");
-    setIframeSize(iframe, width, height);
+    setIframeSize(iframe, "0px", "0px");
     iframe.style.borderWidth = "0px";
     iframe.style.position = "absolute";
     iframe.style.backgroundColor = "transparent";
     iframe.style.overflow = "scroll";
     iframe.style.zIndex = 10000;
+    iframe.style.left = `${pos.right + window.scrollX}px`;
+    iframe.style.top = `${pos.bottom + window.scrollY}px`;
 
     iframe.style.visibility = "hidden";
     document.body.appendChild(iframe);    
-    const clampedPos = getClampedPosToBox(
-                    {
-                        left: pos.right + window.scrollX, 
-                        top: pos.bottom + window.scrollY,
-                        right: pos.right + window.scrollX + iframe.offsetWidth,
-                        bottom: pos.bottom + window.scrollY + iframe.offsetHeight
-                    }, 
-                    {
-                        right: document.documentElement.clientWidth + window.scrollX,
-                        bottom: document.documentElement.clientHeight + window.scrollY
-                    });
-
-    iframe.style.left = `${clampedPos.left}px`;
-    iframe.style.top = `${clampedPos.top}px`;
-
     attachCloseOnClickListener(iframe);
-    iframe.style.visibility = "visible";
     return iframe;
 }
 
@@ -124,6 +111,7 @@ async function attachMsgListener()
         {
             'SET_IFRAME_SIZE': 
                 (params) => {
+                    console.log("resize params:", params);
                     const iframeElement = document.getElementById("findOnSpotify-iFrame");
                     setIframeSize(iframeElement, params.width, params.height);
 
@@ -152,6 +140,33 @@ async function attachMsgListener()
             'SET_IFRAME_RADIUS':
                 (params) => {
                     setIframeRadius(document.getElementById("findOnSpotify-iFrame"), params.radius);
+                },
+
+            'FRAME_LOADED':
+                (params) => {
+                    
+                    const iframeElement = document.getElementById("findOnSpotify-iFrame");
+                    
+                    setIframeSize(iframeElement, params.width, params.height);
+                    
+                    iframePos = iframeElement.getBoundingClientRect();
+                    
+                    const clampedPos = getClampedPosToBox(
+                        {
+                            left: iframePos.left + window.scrollX, 
+                            top: iframePos.top + window.scrollY,
+                            right: iframePos.left + window.scrollX + parseInt(params.width),
+                            bottom: iframePos.top + window.scrollY + parseInt(params.height)
+                        }, 
+                        {
+                            right: document.documentElement.clientWidth + window.scrollX,
+                            bottom: document.documentElement.clientHeight + window.scrollY
+                        });
+    
+                    iframeElement.style.left = `${clampedPos.left}px`;
+                    iframeElement.style.top = `${clampedPos.top}px`;
+                        
+                    iframeElement.style.visibility = "visible";
                 }
         }
     );
@@ -205,7 +220,7 @@ async function onSelect(){
         let selectionText = selection.toString();
         if(selectionText.length > 0)
         {
-            insertIFrame(getBtnPosition(selection), "2.1875rem", "2.1875rem");
+            insertIFrame(getBtnPosition(selection));
         }
     }
 }

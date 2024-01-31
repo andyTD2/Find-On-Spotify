@@ -64,9 +64,15 @@ export class contextMenu {
         Send a message to the content script to resize the iframe to the context menu's dimensions.
         This should be used in conjunction with changing the size of the context menu
     */
-    async requestIFrameResize()
+    async requestIFrameResize(optionalDimensions)
     {
-        await chrome.tabs.sendMessage(this.id, {request: "SET_IFRAME_SIZE", width: this.width, height: this.height});
+        if(!optionalDimensions)
+        {
+            await chrome.tabs.sendMessage(this.id, {request: "SET_IFRAME_SIZE", width: this.width, height: this.height});
+            return;
+        }
+
+        await chrome.tabs.sendMessage(this.id, {request: "SET_IFRAME_SIZE", width: optionalDimensions.width, height: optionalDimensions.height});
     }
 
     /*
@@ -145,9 +151,13 @@ export class contextMenu {
     async displayMenu()
     {
         document.getElementById("findOnSpotify-openMenuButton").style.display = "none";
-        document.getElementById("findOnSpotify-contextMenu").style.display = "block";
+
+        const menu = document.getElementById("findOnSpotify-contextMenu");
+
+        menu.style.display = "block";
+
         await this.requestIFrameRadiusResize();
-        await this.requestIFrameResize();
+        await this.requestIFrameResize({width: `${menu.offsetWidth}px`, height: `${menu.offsetHeight}px`});
     }
 
     /*

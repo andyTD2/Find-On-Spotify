@@ -30,7 +30,6 @@ export class playlistMenu {
         let menuWidth = menu.offsetWidth;
         let menuHeight = menu.offsetHeight;
 
-        console.log(menuWidth);
         menu.style.left = (menuWidth + event.clientX > container.right) ? event.clientX - menuWidth : event.clientX;
         menu.style.top = (menuHeight + event.clientY > container.bottom) ? event.clientY - menuHeight : event.clientY;
 
