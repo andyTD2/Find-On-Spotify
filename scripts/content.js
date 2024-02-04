@@ -2,20 +2,31 @@ loadContent();
 
 function getClampedPosToBox(innerBoundingBox, outerBoundingBox)
 {
-    console.log("inner", innerBoundingBox);
-    console.log("innerBoundingBox.right", innerBoundingBox.right, "outBoundingRight", outerBoundingBox.right);
-    console.log("innerBoundingBox.bottom", innerBoundingBox.bottom, "outBoundingBottom", outerBoundingBox.bottom);
     return {
         left: (innerBoundingBox.right > outerBoundingBox.right) ? outerBoundingBox.right - (innerBoundingBox.right - innerBoundingBox.left) : innerBoundingBox.left,
         top: (innerBoundingBox.bottom > outerBoundingBox.bottom) ? outerBoundingBox.bottom - (innerBoundingBox.bottom - innerBoundingBox.top) : innerBoundingBox.top
     }
 }
-/*
-    return {
-        left: (innerBoundingBox.right > window.innerWidth) ? window.innerWidth - width : left,
-        top: (bottom > window.innerHeight) ? window.innerHeight - height : bottom - height
-    }
-*/
+
+
+function setElementPosToWindowInterior(element)
+{
+    const elementBox = element.getBoundingClientRect();
+    const elementPos = getClampedPosToBox(
+        {
+            left: elementBox.left + window.scrollX, 
+            top: elementBox.top + window.scrollY,
+            right: elementBox.left + window.scrollX + element.offsetWidth,
+            bottom: elementBox.top + window.scrollY + element.offsetHeight
+        }, 
+        {
+            right: document.documentElement.clientWidth + window.scrollX,
+            bottom: document.documentElement.clientHeight + window.scrollY
+        });
+
+    element.style.top = `${elementPos.top}px`;
+    element.style.left = `${elementPos.left}px`;
+}
 
 
 
@@ -26,8 +37,8 @@ async function loadContent()
 {
     await attachMsgListener();
     let debouncedOnSelect = debounce(onSelect);
-    document.addEventListener("selectionchange", async function(event){
-        await debouncedOnSelect();
+    document.addEventListener("selectionchange", async function(){
+        debouncedOnSelect();
     });
 }
 
@@ -71,7 +82,6 @@ function insertIFrame(pos)
     iframe.style.borderWidth = "0px";
     iframe.style.position = "absolute";
     iframe.style.backgroundColor = "transparent";
-    iframe.style.overflow = "scroll";
     iframe.style.zIndex = 10000;
     iframe.style.left = `${pos.right + window.scrollX}px`;
     iframe.style.top = `${pos.bottom + window.scrollY}px`;
@@ -104,6 +114,11 @@ function attachCloseOnClickListener(element)
 */
 async function attachMsgListener()
 {
+    chrome.runtime.onMessage.addListener(
+        function(message, sender, sendResponse) {
+            msgHandler.handleFunction({sender, sendResponse, ...message});
+    });
+
     //import the messageHandler class
     const messageHandler = (await import(chrome.runtime.getURL("scripts/messageHandler.js"))).messageHandler;
 
@@ -111,25 +126,9 @@ async function attachMsgListener()
         {
             'SET_IFRAME_SIZE': 
                 (params) => {
-                    console.log("resize params:", params);
                     const iframeElement = document.getElementById("findOnSpotify-iFrame");
                     setIframeSize(iframeElement, params.width, params.height);
-
-                    const bounds = iframeElement.getBoundingClientRect();
-                    const clampedPos = getClampedPosToBox(
-                        {
-                            left: bounds.left + window.scrollX, 
-                            top: bounds.top + window.scrollY,
-                            right: bounds.left + window.scrollX + iframeElement.offsetWidth,
-                            bottom: bounds.top + window.scrollY + iframeElement.offsetHeight
-                        }, 
-                        {
-                            right: document.documentElement.clientWidth + window.scrollX,
-                            bottom: document.documentElement.clientHeight + window.scrollY
-                        });
-
-                    iframeElement.style.top = `${clampedPos.top}px`;
-                    iframeElement.style.left = `${clampedPos.left}px`;
+                    setElementPosToWindowInterior(iframeElement);
                 },
             
             'GET_SELECTION':
@@ -144,38 +143,13 @@ async function attachMsgListener()
 
             'FRAME_LOADED':
                 (params) => {
-                    
                     const iframeElement = document.getElementById("findOnSpotify-iFrame");
-                    
                     setIframeSize(iframeElement, params.width, params.height);
-                    
-                    iframePos = iframeElement.getBoundingClientRect();
-                    
-                    const clampedPos = getClampedPosToBox(
-                        {
-                            left: iframePos.left + window.scrollX, 
-                            top: iframePos.top + window.scrollY,
-                            right: iframePos.left + window.scrollX + parseInt(params.width),
-                            bottom: iframePos.top + window.scrollY + parseInt(params.height)
-                        }, 
-                        {
-                            right: document.documentElement.clientWidth + window.scrollX,
-                            bottom: document.documentElement.clientHeight + window.scrollY
-                        });
-    
-                    iframeElement.style.left = `${clampedPos.left}px`;
-                    iframeElement.style.top = `${clampedPos.top}px`;
-                        
+                    setElementPosToWindowInterior(iframeElement);
                     iframeElement.style.visibility = "visible";
                 }
         }
     );
-
-
-    chrome.runtime.onMessage.addListener(
-        function(message, sender, sendResponse) {
-            msgHandler.handleFunction({sender, sendResponse, ...message});
-    });
 }
 
 /*
@@ -209,7 +183,6 @@ async function onSelect(){
     let existingIFrame = document.getElementById("findOnSpotify-iFrame");
     if (existingIFrame)
     {
-        console.log("removing existing iframe:", existingIFrame);
         existingIFrame.remove();
     }
 

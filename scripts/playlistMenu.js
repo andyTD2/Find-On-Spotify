@@ -70,7 +70,6 @@ export class playlistMenu {
             {
                 element.style.display = "none";
                 document.removeEventListener("mousedown", hideMenuOnOutsideClick);
-                console.log("closed");
             }
         })
     }

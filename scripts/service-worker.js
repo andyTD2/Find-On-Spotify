@@ -12,13 +12,11 @@ import { messageHandler } from "/scripts/messageHandler.js";
 */
 async function onMessageHandler(user, message, sender, sendResponse, msgHandler)
 {
-    console.log(message);
-
     if(!user.hasValidToken())
     {
         await user.refreshToken();
     }
-    msgHandler.handleFunction({sender, sendResponse, ...message});
+    msgHandler.handleFunction({user, sender, sendResponse, ...message});
 }
 
 
@@ -28,127 +26,129 @@ async function onMessageHandler(user, message, sender, sendResponse, msgHandler)
 */
 async function main()
 {
-    let user = new User(await loadData("accessTokenData"));
-
     let msgHandler = new messageHandler(
-    {
-        'GET_LINK_STATUS': 
-            (params) => {
-                params.sendResponse({linkStatus: user.isLinked()});
-            },
-
-        'UNLINK_ACCOUNT': 
-            async (params) => {
-                try {
-                    await user.deleteCurrentUser();
-                    params.sendResponse({success : true});
-                }
-                catch(error)
-                {
-                    console.log(error);
-                    params.sendResponse({success: false, error});
-                }
-            },
-
-        'LINK_ACCOUNT':
-            async (params) => {
-                try {
-                    if (await user.fetchAuthorization() && await user.fetchUserProfileData())
+        {
+            'GET_LINK_STATUS': 
+                (params) => {
+                    params.sendResponse({linkStatus: params.user.isLinked()});
+                },
+    
+            'UNLINK_ACCOUNT': 
+                async (params) => {
+                    try {
+                        await params.user.deleteCurrentUser();
                         params.sendResponse({success : true});
-                    else
+                    }
+                    catch(error)
+                    {
+                        console.log(error);
+                        params.sendResponse({success: false, error});
+                    }
+                },
+    
+            'LINK_ACCOUNT':
+                async (params) => {
+                    try {
+                        if (await params.user.fetchAuthorization() && await params.user.fetchUserProfileData())
+                            params.sendResponse({success : true});
+                        else
+                            params.sendResponse({success: false});
+                    }
+                    catch(error)
+                    {
                         params.sendResponse({success: false});
-                }
-                catch(error)
-                {
-                    params.sendResponse({success: false});
-                }
-            },
+                    }
+                },
+    
+            'SEARCH_QUERY':
+                async (params) => {
+                    try {
+                        let result = await params.user.searchTrack(params.query);
+                        params.sendResponse({
+                            success: result ? true : false, 
+                            data: result});
+    
+                    }
+                    catch(error)
+                    {
+                        params.sendResponse({success: false});
+                    }
+                },
+    
+            'GET_PLAYLISTS': 
+                async (params) => {
+                    try {
+                        let result = await params.user.getCurrentUserPlaylists();
+                        params.sendResponse({
+                            success: result ? true : false, 
+                            data: result})
+                    }
+                    catch(error)
+                    {
+                        params.sendResponse({success: false});
+                    }
+                },
+    
+            'GET_USER': 
+                async (params) => {
+                    try {
+                        let result = params.user.getUserProfileData();
+                        params.sendResponse({
+                            success: result ? true : false,
+                            data: result});
+                    }
+                    catch(error)
+                    {
+                        params.sendResponse({success: false});
+                    }
+                },
+    
+            'GET_SAVED_TRACKS':
+                async (params) => {
+                    try {
+                        let result = await params.user.getSavedTracks();
+                        params.sendResponse({
+                            success: result ? true : false,
+                            data: result});
+                    }
+                    catch(error)
+                    {
+                        params.sendResponse({success: false});
+                    }
+                },
+    
+            'IFRAME_LOADED': 
+                (params) => {
+                    chrome.tabs.sendMessage(params.sender.tab.id);
+                },   
+    
+            'GET_TAB_ID':
+                (params) => {
+                    params.sendResponse({id: params.sender.tab.id});
+                },
+    
+            'ADD_TO_PLAYLIST':
+                async (params) => {
+                    try {
+                        let result = await params.user.addTrackToPlaylist(params.playlistId, params.trackUri);
+                        params.sendResponse({
+                            success: result ? true : false,
+                            data: result});
+                    }
+                    catch(error)
+                    {
+                        params.sendResponse({success: false});
+                    }
+                },
+        });
 
-        'SEARCH_QUERY':
-            async (params) => {
-                try {
-                    let result = await user.searchTrack(params.query);
-                    params.sendResponse({
-                        success: result ? true : false, 
-                        data: result});
-
-                }
-                catch(error)
-                {
-                    params.sendResponse({success: false});
-                }
-            },
-
-        'GET_PLAYLISTS': 
-            async (params) => {
-                try {
-                    let result = await user.getCurrentUserPlaylists();
-                    params.sendResponse({
-                        success: result ? true : false, 
-                        data: result})
-                }
-                catch(error)
-                {
-                    params.sendResponse({success: false});
-                }
-            },
-
-        'GET_USER': 
-            async (params) => {
-                try {
-                    let result = user.getUserProfileData();
-                    params.sendResponse({
-                        success: result ? true : false,
-                        data: result});
-                }
-                catch(error)
-                {
-                    params.sendResponse({success: false});
-                }
-            },
-
-        'GET_SAVED_TRACKS':
-            async (params) => {
-                try {
-                    let result = await user.getSavedTracks();
-                    params.sendResponse({
-                        success: result ? true : false,
-                        data: result});
-                }
-                catch(error)
-                {
-                    params.sendResponse({success: false});
-                }
-            },
-
-        'IFRAME_LOADED': 
-            (params) => {
-                chrome.tabs.sendMessage(params.sender.tab.id);
-            },   
-
-        'GET_TAB_ID':
-            (params) => {
-                params.sendResponse({id: params.sender.tab.id});
-            },
-
-        'ADD_TO_PLAYLIST':
-            async (params) => {
-                try {
-                    let result = await user.addTrackToPlaylist(params.playlistId, params.trackUri);
-                    params.sendResponse({
-                        success: result ? true : false,
-                        data: result});
-                }
-                catch(error)
-                {
-                    params.sendResponse({success: false});
-                }
-            },
-    });
-
+    let curUser = undefined;
     chrome.runtime.onMessage.addListener(
         function(message, sender, sendResponse) {
-            onMessageHandler(user, message, sender, sendResponse, msgHandler);
+            (async () => {
+                if(!curUser) curUser = new User(await loadData("accessTokenData"));
+                onMessageHandler(curUser, message, sender, sendResponse, msgHandler);
+            })();
             return true;
         }
     )
