@@ -1,5 +1,5 @@
-import * as auth from "/scripts/auth.js";
-import {saveData, deleteData} from "/scripts/utils/storage.js";
+import * as auth from "/content/serviceWorker/scripts/auth.js";
+import {saveData, deleteData} from "/content/utils/storage.js";
 
 
 export class User

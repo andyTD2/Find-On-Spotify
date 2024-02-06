@@ -4,15 +4,15 @@
   "description": "",
   "version": "1.0",
   "action": {
-    "default_popup": "/views/default.html"
+    "default_popup": "/popup/views/default.html"
   },
   "background": {
-    "service_worker": "scripts/service-worker.js",
+    "service_worker": "/content/serviceWorker/scripts/service-worker.js",
     "type": "module"
   },
   "content_scripts": [
     {
-      "js": ["scripts/utils/debounce.js", "scripts/content.js"],
+      "js": ["content/utils/debounce.js", "content/injectIframe.js"],
       "matches": ["<all_urls>"]
     }
   ],
@@ -23,7 +23,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["scripts/messageHandler.js", "scripts/playlistMenu.js", "views/contextMenu.html", "views/contextMenuBtn.html", "views/images/spotifyLogo.png", "views/images/plusIcon.png", "views/images/playIcon.png", "views/images/pauseIcon.png"],
+      "resources": ["content/utils/messageHandler.js", "content/iFrame/scripts/playlistMenu.js", "content/iFrame/views/contextMenuBtn.html", "content/iFrame/views/images/spotifyLogo.png", "content/iFrame/views/images/plusIcon.png", "content/iFrame/views/images/playIcon.png", "content/iFrame/views/images/pauseIcon.png"],
       "matches": ["<all_urls>"]
     }
   ]

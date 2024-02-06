@@ -1,6 +1,6 @@
-import {User} from "/scripts/user.js";
-import {loadData} from "/scripts/utils/storage.js";
-import { messageHandler } from "/scripts/messageHandler.js";
+import {User} from "/content/serviceWorker/scripts/user.js";
+import {loadData} from "/content/utils/storage.js";
+import { messageHandler } from "/content/utils/messageHandler.js";
 
 
 /*

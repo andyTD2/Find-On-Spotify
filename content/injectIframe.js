@@ -1,5 +1,11 @@
 loadContent();
 
+/*
+    Returns a new position that will not overflow the outer bounding box
+    @param innerBoundingBox: the bounding box of the element that must not overflow
+    @param outerBoundingBox: the bounding box of the element that contains the innerBoundingBox
+    @return the left and top position
+*/
 function getClampedPosToBox(innerBoundingBox, outerBoundingBox)
 {
     return {
@@ -8,7 +14,10 @@ function getClampedPosToBox(innerBoundingBox, outerBoundingBox)
     }
 }
 
-
+/*
+    If the position of the element overflows the window, reposition the element to fit within the window.
+    @param element: the element to position
+*/
 function setElementPosToWindowInterior(element)
 {
     const elementBox = element.getBoundingClientRect();
@@ -74,7 +83,7 @@ function insertIFrame(pos)
 {
     const iframe = document.createElement("iframe");
     iframe.id = "findOnSpotify-iFrame";
-    iframe.src = "chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/views/contextMenuBtn.html";
+    iframe.src = "chrome-extension://phbbhhccncpkopkloglnkamlafiepnge/content/iFrame/views/contextMenuBtn.html";
 
 
     setIframeRadius(iframe, "50%");
@@ -120,7 +129,7 @@ async function attachMsgListener()
     });
 
     //import the messageHandler class
-    const messageHandler = (await import(chrome.runtime.getURL("scripts/messageHandler.js"))).messageHandler;
+    const messageHandler = (await import(chrome.runtime.getURL("content/utils/messageHandler.js"))).messageHandler;
 
     let msgHandler = new messageHandler(
         {

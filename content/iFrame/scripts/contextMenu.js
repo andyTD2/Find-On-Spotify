@@ -169,7 +169,7 @@ export class contextMenu {
     async populateTrackList(trackList, sharedPlaylist)
     {
         //IMPORT trackItem CLASS
-        const trackItem = (await import(chrome.runtime.getURL("scripts/trackItem.js"))).trackItem;
+        const trackItem = (await import(chrome.runtime.getURL("/content/iFrame/scripts/trackItem.js"))).trackItem;
 
         let trackListContainer = document.getElementById("findOnSpotify-searchResults");
         for (let i = 0; i < trackList.length; ++i)
@@ -182,7 +182,7 @@ export class contextMenu {
             
             
             let track = new trackItem(
-                (trackList[i].album.images.length > 0) ? trackList[i].album.images[0].url : "/views/images/placeholder.png",
+                (trackList[i].album.images.length > 0) ? trackList[i].album.images[0].url : "/content/iFrame/views/images/placeholder.png",
                 trackList[i].preview_url,
                 trackList[i].name,
                 artists,
@@ -206,7 +206,7 @@ export class contextMenu {
     {
 
         //IMPORT playlistMenu CLASS
-        const playlistMenu = (await import(chrome.runtime.getURL("scripts/playlistMenu.js"))).playlistMenu;
+        const playlistMenu = (await import(chrome.runtime.getURL("/content/iFrame/scripts/playlistMenu.js"))).playlistMenu;
 
 
         await this.displayMenu();
