@@ -110,7 +110,7 @@ export class contextMenu {
     async query(query)
     {
         let response = await chrome.runtime.sendMessage({request: "SEARCH_QUERY", query: query});
-        if(response.success) return response.data.tracks.items;
+        if(response.success) {console.log(response.data.tracks.items); return response.data.tracks.items};
     }
 
 

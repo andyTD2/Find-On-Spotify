@@ -1,5 +1,5 @@
 :root {
-    --bg-color: rgb(15, 174, 126);
+    --bg-color: rgb(29,185,84);
 }
 
 html {
@@ -29,20 +29,22 @@ body {
 
 
 .largeButton {
+    border: none;
+    border-radius: 50px;
     width: 200px;
-    height: 50px;
+    height: 40px;
     font-size: 1.5rem;
     align-self: center;
     background-color: var(--bg-color);
-    color: white;
+    color: black;
 }
 
 .largeButton:hover {
-    background-color: rgb(44,133,107);
+    background-color: rgb(22, 109, 52)
 }
 
 .largeButton:active {
-    color: black;
+    background-color: var(--bg-color);
 }
 
 #unlink-account, #link-account {
