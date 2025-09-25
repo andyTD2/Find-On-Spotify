@@ -32,6 +32,7 @@ body {
 }
 
 #findOnSpotify {
+    background-color: rgba(29,185,84,1);
     color: white;
 }
 
@@ -39,20 +40,15 @@ body {
     display: none;
     height: 25rem;
     width: 25rem;
-    background-color: rgb(25, 24, 28) !important;
+    background: linear-gradient(to bottom left, rgba(29,185,84,1), black);
     user-select: none;
-    border-radius: 15px !important;
 }
 
 #findOnSpotify-header {
     height: 3.125rem;
     border-top-right-radius: inherit;
     border-top-left-radius: inherit;
-     background: linear-gradient(
-        to bottom,               /* direction */
-        rgb(29,185,84),     /* start color */
-        rgb(85, 240, 140)      /* end color */
-    ) !important;
+    background-color: rgb(25, 24, 28);
     display: flex;
     flex-direction: row;
     padding-left: .625rem;
@@ -70,6 +66,8 @@ body {
     display:flex;
     flex-direction: row;
     margin-left: auto;
+    justify-content: center;
+    align-items: center;
 }
 
 #findOnSpotify-volumeSlider {
@@ -82,7 +80,7 @@ body {
 
 #findOnSpotify-volumeSlider::-webkit-slider-runnable-track
 {
-    background: rgb(25, 24, 28);
+    background: rgb(29,185,84);
     height: .5rem;
     width: 4.6875rem;
 }
@@ -98,11 +96,15 @@ body {
     margin-top: -0.3125rem;
 }
 
+#findOnSpotify-volumeSlider::-webkit-slider-thumb:hover{
+    background-color: rgb(36, 236, 106) ;
+}
+
 #findOnSpotify-currentVolume
 {
-    margin-top: auto;
-    margin-bottom: auto;
     width: 1.25rem;
+    color: rgb(29,185,84);
+    margin-bottom: 1px;
 }
 
 #findOnSpotify-searchResults {
